@@ -9,3 +9,6 @@ export ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
 
 # Start zim
 [[ -s ${ZIM_HOME}/init.zsh ]] && source ${ZIM_HOME}/init.zsh
+
+# If persoanl zsh config exists - use that
+[[ -s ${HOME}/.zshrc_local ]] && source ${HOME}/.zshrc_local

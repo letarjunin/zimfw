@@ -19,19 +19,21 @@ autoload -Uz vcs_info
 if [[ $terminfo[colors] -ge 256 ]]; then
     turquoise="%F{73}"
     orange="%F{179}"
+    blue="%F{39}"
     purple="%F{140}"
     red="%F{167}"
     limegreen="%F{107}"
 else
     turquoise="%F{cyan}"
     orange="%F{yellow}"
+    blue="%F{39}"
     purple="%F{magenta}"
     red="%F{hotpink}"
     limegreen="%F{green}"
 fi
 
 # enable VCS systems you use.
-zstyle ':vcs_info:*' enable git svn
+zstyle ':vcs_info:*' enable git
 
 # check-for-changes can be really slow.
 # you should disable it, if you work with large repositories.
@@ -85,5 +87,5 @@ function oxide_precmd {
 add-zsh-hook precmd oxide_precmd
 
 PROMPT=$'
-%{$limegreen%}%~${PR_RST} $vcs_info_msg_0_$(virtualenv_info)
+%{$orange%}%t%{$blue%} %n@$MNAME %{$limegreen%}%~${PR_RST} $vcs_info_msg_0_$(virtualenv_info)
 %(?.%F{white}.%F{red})$%f '

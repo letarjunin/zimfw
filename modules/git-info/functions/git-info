@@ -130,7 +130,7 @@ fi
 # Get the branch.
 __GIT_INFO_BRANCH=$(command git symbolic-ref -q --short HEAD 2>/dev/null)
 
-local ahead_formatted behind_formatted branch_formatted commit_formatted diverged_formatted position_formatted remote_formatted
+local ahead_formatted behind_formatted branch_formatted remotegit_formatted commit_formatted diverged_formatted position_formatted remote_formatted
 if [[ -n ${__GIT_INFO_BRANCH} ]]; then
   unset __GIT_INFO_POSITION
 
@@ -138,7 +138,19 @@ if [[ -n ${__GIT_INFO_BRANCH} ]]; then
   local branch_format
   zstyle -s ':zim:git-info:branch' format 'branch_format'
   if [[ -n ${branch_format} ]]; then
-    zformat -f branch_formatted ${branch_format} 'b:${__GIT_INFO_BRANCH}'
+    zformat -f branch_formatted ${branch_format} "b:${__GIT_INFO_BRANCH}"
+  fi
+
+  # Format remote repo.
+  local remote_repo
+  zstyle -s ':zim:git-info:remotef' format 'remote_repo'
+  if [[ -n ${remote_repo} ]]; then
+    local remote=$(command git config --get remote.origin.url 2>/dev/null)
+    git_f=${remote##*/}
+    remotef=${git_f%.*}
+    if [[ -n ${remotef} ]]; then
+      zformat -f remotegit_formatted ${remote_repo} "k:${remotef}"
+    fi
   fi
 
   # Format remote.
@@ -297,6 +309,7 @@ for info_format in ${(k)info_formats}; do
     "b:${branch_formatted}" \
     "C:${clean_formatted}" \
     "c:${commit_formatted}" \
+    "k:${remotegit_formatted}" \
     "D:${dirty_formatted}" \
     "i:${indexed_formatted}" \
     "I:${unindexed_formatted}" \

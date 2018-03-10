@@ -90,3 +90,6 @@ zhighlighters=(main brackets cursor)
 
 # Load any helper scripts as defined here
 #zpacman_helper=(aur)
+
+# Allow for personal .zimrc files to override default values.
+[[ -s ${HOME}/.zimrc_local ]] && source ${HOME}/.zimrc_local

@@ -135,7 +135,7 @@ function prompt_parajun_setup {
 
   # Define prompts.
   PROMPT='${(e)$(prompt_parajun_build_prompt)}
-$ ${editor_info[keymap]}'
+፨  ${editor_info[keymap]}'
   SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
   RPROMPT='$_prompt_oxajun_git'
 }

@@ -121,6 +121,7 @@ function prompt_parajun_setup {
   zstyle ':zim:editor:info:keymap:alternate' format '%B%F{red}❮%f%b'
 
   # Set git-stipped-infoparameters.
+  zstyle ':zim:git-info' ignore_submodules 'all'
   zstyle ':zim:git-info' verbose 'no'
   zstyle ':zim:git-info:action' format ' ⁝ %s'
   zstyle ':zim:git-info:ahead' format ' ⬆'
@@ -130,8 +131,9 @@ function prompt_parajun_setup {
   zstyle ':zim:git-info:commit' format '➦ %.7c'
   zstyle ':zim:git-info:position' format '%p'
   zstyle ':zim:git-info:stashed' format ' ✱'
+  zstyle ':zim:git-info:untracked' format ' %F{yellow} (%u)'
   zstyle ':zim:git-info:keys' format \
-    'status' '%k%b%p%c%A%B%s%S'
+    'status' '%k%b%p%c%A%B%s%S%u'
 
   # Define prompts.
   PROMPT='${(e)$(prompt_parajun_build_prompt)}

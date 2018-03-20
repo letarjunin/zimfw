@@ -97,7 +97,7 @@ function prompt_parajun_precmd {
   unsetopt XTRACE KSH_ARRAYS
 
   # Format PWD.
-  _prompt_parajun_pwd=" $(short_pwd)"
+  _prompt_parajun_pwd=" $(pwd)"
 
   prompt_oxajun_async_tasks
 }

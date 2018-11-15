@@ -18,9 +18,6 @@ fpath=(${0:h}/external/src ${fpath})
 # load and initialize the completion system
 autoload -Uz compinit && compinit -C -d "${ZDOTDIR:-${HOME}}/${zcompdump_file:-.zcompdump}"
 
-# set any compdefs
-source ${0:h}/compdefs.zsh
-
 
 #
 # zsh options
@@ -56,9 +53,13 @@ zstyle ':completion:*:warnings' format '%F{red}-- no matches found --%f'
 zstyle ':completion:*' format '%F{yellow}-- %d --%f'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' verbose yes
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' '+r:|?=**'
 
 # directories
+if (( ! ${+LS_COLORS} )); then
+  # Locally use same LS_COLORS definition from utility module, in case it was not set
+  local LS_COLORS='di=1;34:ln=35:so=32:pi=33:ex=31:bd=1;36:cd=1;33:su=30;41:sg=30;46:tw=30;42:ow=30;43'
+fi
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
 zstyle ':completion:*:*:cd:*:directory-stack' menu yes select
@@ -88,3 +89,8 @@ zstyle ':completion:*:history-words' menu yes
 # ignore multiple entries.
 zstyle ':completion:*:(rm|kill|diff):*' ignore-line other
 zstyle ':completion:*:rm:*' file-patterns '*:all-files'
+
+# If the _my_hosts function is defined, it will be called to add the ssh hosts
+# completion, otherwise _ssh_hosts will fall through and read the ~/.ssh/config
+zstyle -e ':completion:*:*:ssh:*:my-accounts' users-hosts \
+  '[[ -f ${HOME}/.ssh/config && ${key} == hosts ]] && key=my_hosts reply=()'

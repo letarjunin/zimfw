@@ -11,7 +11,7 @@ unset git_info
 typeset -gA git_info
 
 # Return if not inside a Git repository work tree.
-if ! command git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+if ! command git rev-parse --is-inside-work-tree &>/dev/null; then
   return 1
 fi
 
@@ -21,98 +21,14 @@ zstyle -s ':zim:git-info' ignore-submodules 'ignore_submodules' || ignore_submod
 
 # Format stashed.
 local stashed_format stashed_formatted
-zstyle -s ':zim:git-info:stashed' format 'stashed_format'
-if [[ -n ${stashed_format} ]]; then
+if zstyle -s ':zim:git-info:stashed' format 'stashed_format'; then
   local -i stashed=$(command git stash list 2>/dev/null | wc -l)
   (( stashed )) && zformat -f stashed_formatted ${stashed_format} "S:${stashed}"
 fi
 
 # Format action.
 local action_format action_formatted
-zstyle -s ':zim:git-info:action' format 'action_format'
-if [[ -n ${action_format} ]]; then
-  # Gets the Git special action (am, bisect, cherry, merge, rebase).
-  # Borrowed from vcs_info and edited.
-  git-action() {
-    local git_dir=${$(command git rev-parse --git-dir):A}
-    local action_dir
-    for action_dir in \
-      "${git_dir}/rebase-apply" \
-      "${git_dir}/rebase" \
-      "${git_dir}/../.dotest"
-    do
-      if [[ -d ${action_dir} ]]; then
-        local apply_formatted rebase_formatted
-        zstyle -s ':zim:git-info:action:apply' format 'apply_formatted' || apply_formatted='apply'
-        zstyle -s ':zim:git-info:action:rebase' format 'rebase_formatted' || rebase_formatted='rebase'
-
-        if [[ -f "${action_dir}/rebasing" ]]; then
-          print ${rebase_formatted}
-        elif [[ -f "${action_dir}/applying" ]]; then
-          print ${apply_formatted}
-        else
-          print "${rebase_formatted}/${apply_formatted}"
-        fi
-
-        return 0
-      fi
-    done
-
-    for action_dir in \
-      "${git_dir}/rebase-merge/interactive" \
-      "${git_dir}/.dotest-merge/interactive"
-    do
-      if [[ -f ${action_dir} ]]; then
-        local rebase_interactive_formatted
-        zstyle -s ':zim:git-info:action:rebase-interactive' format 'rebase_interactive_formatted' || rebase_interactive_formatted='rebase-interactive'
-        print ${rebase_interactive_formatted}
-        return 0
-      fi
-    done
-
-    for action_dir in \
-      "${git_dir}/rebase-merge" \
-      "${git_dir}/.dotest-merge"
-    do
-      if [[ -d ${action_dir} ]]; then
-        local rebase_merge_formatted
-        zstyle -s ':zim:git-info:action:rebase-merge' format 'rebase_merge_formatted' || rebase_merge_formatted='rebase-merge'
-        print ${rebase_merge_formatted}
-        return 0
-      fi
-    done
-
-    if [[ -f "${git_dir}/MERGE_HEAD" ]]; then
-      local merge_formatted
-      zstyle -s ':zim:git-info:action:merge' format 'merge_formatted' || merge_formatted='merge'
-      print ${merge_formatted}
-      return 0
-    fi
-
-    if [[ -f "${git_dir}/CHERRY_PICK_HEAD" ]]; then
-      if [[ -d "${git_dir}/sequencer" ]]; then
-        local cherry_pick_sequence_formatted
-        zstyle -s ':zim:git-info:action:cherry-pick-sequence' format 'cherry_pick_sequence_formatted' || cherry_pick_sequence_formatted='cherry-pick-sequence'
-        print ${cherry_pick_sequence_formatted}
-      else
-        local cherry_pick_formatted
-        zstyle -s ':zim:git-info:action:cherry-pick' format 'cherry_pick_formatted' || cherry_pick_formatted='cherry-pick'
-        print ${cherry_pick_formatted}
-      fi
-
-      return 0
-    fi
-
-    if [[ -f "${git_dir}/BISECT_LOG" ]]; then
-      local bisect_formatted
-      zstyle -s ':zim:git-info:action:bisect' format 'bisect_formatted' || bisect_formatted='bisect'
-      print ${bisect_formatted}
-      return 0
-    fi
-
-    return 1
-  }
-
+if zstyle -s ':zim:git-info:action' format 'action_format'; then
   local action=$(git-action)
   if [[ -n ${action} ]]; then
     zformat -f action_formatted ${action_format} "s:${action}"
@@ -155,8 +71,7 @@ if [[ -n ${__GIT_INFO_BRANCH} ]]; then
 
   # Format remote.
   local remote_format
-  zstyle -s ':zim:git-info:remote' format 'remote_format'
-  if [[ -n ${remote_format} ]]; then
+  if zstyle -s ':zim:git-info:remote' format 'remote_format'; then
     # Gets the remote name.
     local remote_cmd='command git rev-parse --symbolic-full-name --verify HEAD@{upstream}'
     __GIT_INFO_REMOTE=${$(${(z)remote_cmd} 2>/dev/null)##refs/remotes/}
@@ -200,8 +115,7 @@ else
 
   # Format commit.
   local commit_format
-  zstyle -s ':zim:git-info:commit' format 'commit_format'
-  if [[ -n ${commit_format} ]]; then
+  if zstyle -s ':zim:git-info:commit' format 'commit_format'; then
     local commit=$(command git rev-parse --short HEAD 2>/dev/null)
     if [[ -n ${commit} ]]; then
       zformat -f commit_formatted ${commit_format} "c:${commit}"
@@ -210,8 +124,7 @@ else
 
   # Format position.
   local position_format
-  zstyle -s ':zim:git-info:position' format 'position_format'
-  if [[ -n ${position_format} ]]; then
+  if zstyle -s ':zim:git-info:position' format 'position_format'; then
     __GIT_INFO_POSITION=$(command git describe --contains --all HEAD 2>/dev/null)
     if [[ -n ${__GIT_INFO_POSITION} ]]; then
       zformat -f position_formatted ${position_format} 'p:${__GIT_INFO_POSITION}'
@@ -231,7 +144,7 @@ if ! zstyle -t ':zim:git-info' verbose; then
   local unindexed_format
   zstyle -s ':zim:git-info:unindexed' format 'unindexed_format'
   if [[ -n ${unindexed_format} || -n ${dirty_format} || -n ${clean_format} ]]; then
-    if ! command git diff-files --no-ext-diff --quiet --ignore-submodules=${ignore_submodules} >/dev/null 2>&1; then
+    if ! command git diff-files --no-ext-diff --quiet --ignore-submodules=${ignore_submodules} &>/dev/null; then
       unindexed_formatted=${unindexed_format}
       dirty=1
     fi
@@ -241,7 +154,7 @@ if ! zstyle -t ':zim:git-info' verbose; then
   local indexed_format
   zstyle -s ':zim:git-info:indexed' format 'indexed_format'
   if [[ -n ${indexed_format} || (${dirty} -eq 0 && (-n ${dirty_format} || -n ${clean_format})) ]]; then
-    if ! command git diff-index --no-ext-diff --quiet --cached --ignore-submodules=${ignore_submodules} HEAD >/dev/null 2>&1; then
+    if ! command git diff-index --no-ext-diff --quiet --cached --ignore-submodules=${ignore_submodules} HEAD &>/dev/null; then
       indexed_formatted=${indexed_format}
       dirty=1
     fi

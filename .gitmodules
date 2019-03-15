@@ -18,6 +18,10 @@
 	path = modules/prompt/external-themes/liquidprompt
 	url = https://github.com/nojhan/liquidprompt.git
 	ignore = untracked
+[submodule "modules/prompt/external-themes/powerlevel9k"]
+	path = modules/prompt/external-themes/powerlevel9k
+	url = https://github.com/bhilburn/powerlevel9k.git
+	ignore = untracked
 [submodule "modules/prompt/external-themes/lean"]
 	path = modules/prompt/external-themes/lean
 	url = https://github.com/miekg/lean
